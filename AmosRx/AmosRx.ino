@@ -166,5 +166,5 @@ void loop() {
     //dump(&results);
     irrecv.resume(); // Receive the next value
   }
-  delay(25);
+  delay(50);
 }
