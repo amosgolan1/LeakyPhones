@@ -9,9 +9,14 @@ int resetPin = 2;
 int SDIO = A4;
 int SCLK = A5;
 
+#define DEFAULT_STATION 9290
+#define DEFAULT_CHANNEL freqToChannel(DEFAULT_STATION)
+#define MILLIS_BEFORE_RETURN_TO_DEFUALT 1400
+
 Si4703_Breakout radio(resetPin, SDIO, SCLK);
 int radiochannel;
 int volume;
+long lastValidReceived;
 
 /*
  * IRremote: IRrecvDemo - demonstrates receiving IR codes with IRrecv
@@ -153,18 +158,52 @@ void tuneIfNeeded(int16_t channel) {
   }
 }
 
+void printStatus() {
+  Serial.println("----");
+  Serial.print("Current radio channel: ");
+  Serial.println(radiochannel);
+  Serial.print("Time since last valid receive: ");
+  Serial.println(timeSinceLastValidReceive());
+  Serial.println("----");
+}
+
+long timeSinceLastValidReceive() {
+  return millis() - lastValidReceived;
+}
+
+//void 
+
 void loop() {
+  
+   
   if (irrecv.decode(&results)) {
+    //we receieved something
     if (results.decode_type == JVC) {
-      Serial.println(results.value, HEX);
+      //it is of the correct encoding
+      
+      //Serial.println(results.value, HEX);
       int16_t decodedAmos = amosToChannel(results.value);
       Serial.println(decodedAmos, DEC);
       if (decodedAmos != AMOS_INVALID) {
+        //it is a valid amos code
         tuneIfNeeded(decodedAmos);
-      }
-    }
+
+        //record this moment as the last valid receive
+        lastValidReceived=millis();
+        
+      }//if valid amos
+       
+    }//correct encoding
+    
     //dump(&results);
     irrecv.resume(); // Receive the next value
+    
+  }// received some ir
+
+  if ( timeSinceLastValidReceive() > MILLIS_BEFORE_RETURN_TO_DEFUALT) {
+    tuneIfNeeded(DEFAULT_CHANNEL);
   }
-  delay(50);
+
+  printStatus();
+  delay(500);
 }
