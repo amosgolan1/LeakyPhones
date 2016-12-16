@@ -12,6 +12,7 @@
 #define PanasonicPower        0x100BCBD  // Panasonic Power button
 
 #define JVCPower              0xC5E8
+#define DELAY_TIME 25
 
 IRsend irsend;
 //transmitter setting
@@ -27,6 +28,9 @@ Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
 void setup()
 {
     Serial.begin(9600);
+    Serial.println("AMOS_FM TX V0.2");
+    Serial.println("---------------");
+    Serial.println("Setting up radio...");
     
     if (! radio.begin()) {  // begin with address 0x63 (CS high default)
     Serial.println("Couldn't find radio?");
@@ -34,6 +38,10 @@ void setup()
     radio.setTXpower(115);  // dBuV, 88-115 max
     radio.tuneFM(channelToFreq(CHANNEL)); // 102.3 mhz
     //Serial.println(channelToFreq(CHANNEL));
+
+    Serial.print("IR TX Delay set to: ");
+    Serial.println(DELAY_TIME);
+    Serial.println("Started.");
 }
 
 
@@ -70,5 +78,5 @@ void sendChannel(int16_t channel) {
 void loop() {
   sendChannel(CHANNEL);
   //Serial.println("sent");
-  delay(25);
+  delay(DELAY_TIME);
 }
