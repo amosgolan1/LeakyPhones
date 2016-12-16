@@ -70,5 +70,5 @@ void sendChannel(int16_t channel) {
 void loop() {
   sendChannel(CHANNEL);
   //Serial.println("sent");
-  delay(100);
+  delay(10);
 }
