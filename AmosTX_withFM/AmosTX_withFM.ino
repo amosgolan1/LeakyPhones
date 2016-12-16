@@ -12,7 +12,7 @@
 #define PanasonicPower        0x100BCBD  // Panasonic Power button
 
 #define JVCPower              0xC5E8
-#define DELAY_TIME 25
+#define DELAY_TIME 42
 
 IRsend irsend;
 //transmitter setting
@@ -77,6 +77,7 @@ void sendChannel(int16_t channel) {
 
 void loop() {
   sendChannel(CHANNEL);
+  long lastSentTime = millis();
   //Serial.println("sent");
   delay(DELAY_TIME);
 }
