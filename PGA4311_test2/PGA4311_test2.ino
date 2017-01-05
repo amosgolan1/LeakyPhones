@@ -5,11 +5,9 @@
 #define MIN_VOL 1
 #define MAX_VOL 192
 
-#define UPDATE_INTERVAL 25
-
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("Welcome, Volume Control Test V1");
   pinMode(CS_NOT,OUTPUT);
   pinMode(SDI,OUTPUT);
@@ -19,29 +17,8 @@ void setup() {
   digitalWrite(SCLK, LOW);
 }
 
-void loop() {
-  static int vol = MIN_VOL;
-  static bool increase = true;
-
-  if (increase) {
-    if (vol<MAX_VOL) {
-      vol+=1;
-    } else {
-      increase = false;
-      vol = MAX_VOL;
-    }
-  } else {
-    if (vol>MIN_VOL) {
-      vol-=1;
-    } else {
-      increase = true;
-      vol = MIN_VOL;
-    }
-  }
-  
-  Serial.print("Setting volume to: ");
-  Serial.println(vol);
-  
+void setAllVolume(int vol) {
+   
   digitalWrite(SCLK, LOW);
   digitalWrite(CS_NOT,LOW);
 
@@ -68,6 +45,16 @@ void loop() {
   digitalWrite(CS_NOT,HIGH);
   digitalWrite(SCLK, LOW);
 
-  
-  delay(UPDATE_INTERVAL);
+}
+
+void loop() {
+  setAllVolume(191);
+  Serial.println(191);
+  delay(2000);
+  setAllVolume(95);
+  Serial.println(95);
+  delay(2000);
+  setAllVolume(0);
+  Serial.println(0);
+  delay(2000);
 }
