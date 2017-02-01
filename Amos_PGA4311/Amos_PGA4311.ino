@@ -67,7 +67,8 @@ void loop() {
     int other=MAX_VOL-i;
     setVolume(self,other);
     Serial.print("self=");
-    Serial.println(self);
+    Serial.print(self);
+    Serial.print("   ");
     Serial.print("other=");
     Serial.println(other);
     if(i==MIN_VOL) delta=1;

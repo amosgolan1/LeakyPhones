@@ -7,11 +7,6 @@
  * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
  */
 #include <IRremote.h>
- 
-#define PanasonicAddress      0x4004     // Panasonic address (Pre data) 
-#define PanasonicPower        0x100BCBD  // Panasonic Power button
-
-#define JVCPower              0xC5E8
 #define DELAY_TIME 42
 
 IRsend irsend;
@@ -28,7 +23,7 @@ Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
 void setup()
 {
     Serial.begin(9600);
-    Serial.println("AMOS_FM TX V0.2");
+    /*Serial.println("AMOS_FM TX V0.2");
     Serial.println("---------------");
     Serial.println("Setting up radio...");
     
@@ -41,7 +36,7 @@ void setup()
 
     Serial.print("IR TX Delay set to: ");
     Serial.println(DELAY_TIME);
-    Serial.println("Started.");
+    Serial.println("Started.");*/
 }
 
 
@@ -77,6 +72,7 @@ void sendChannel(int16_t channel) {
 
 void loop() {
   sendChannel(CHANNEL);
+  Serial.println(CHANNEL);
   long lastSentTime = millis();
   //Serial.println("sent");
   delay(DELAY_TIME);
