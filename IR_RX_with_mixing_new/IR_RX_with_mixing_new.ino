@@ -160,7 +160,7 @@ void loop() {
       else {
       
         time_from_last_change = millis() - last_change;
-        if (time_from_last_change >= 100) {
+        if (time_from_last_change >= 20) {
 
 
           
@@ -235,5 +235,4 @@ void loop() {
       break;
   }
 }
-
 
