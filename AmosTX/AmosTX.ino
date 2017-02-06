@@ -7,16 +7,30 @@
  * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
  */
 #include <IRremote.h>
- 
-#define PanasonicAddress      0x4004     // Panasonic address (Pre data) 
-#define PanasonicPower        0x100BCBD  // Panasonic Power button
-
-#define JVCPower              0xC5E8
-
 IRsend irsend;
+
+//ada radio setting//
+#include <Wire.h>
+#include <Adafruit_Si4713.h>
+
+#define RESETPIN 12
+
+#define FMSTATION 10230      // 10230 == 102.30 MHz
+
+Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
+#include <Wire.h>
+#include <Adafruit_Si4713.h>
+
+#define RESETPIN 12
+
+#define FMSTATION 9800     // 9800=98.00Hz
+
+Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
+
 
 void setup()
 {
+  Serial.begin(9600);
 }
 
 
@@ -55,14 +69,19 @@ void loop() {
   
 //  irsend.sendJVC(JVCPower, 16,0); // hex value, 16 bits, no repeat
 
-  //irsend.sendNEC(0xFEEE, 16); // hex value, 16 bits, no repeat
-  sendChannel(225);
+  //irsend.sendNEC(50 + (50<<8), 16); // hex value, 16 bits, no repeat
+  irsend.sendNEC(50, 16); 
+  //irsend.sendNEC(0x32,16);
+  //Serial.println(0x32,DEC);
+  //Serial.println("sent");
+  //sendChannel(225);
+  //Serial.println("sent");
 //  delayMicroseconds(50); // see http://www.sbprojects.com/knowledge/ir/jvc.php for information
 //  irsend.sendJVC(JVCPower, 16,1); // hex value, 16 bits, repeat
 //  delayMicroseconds(50);
 
-  delay(100);
-  irsend.sendNEC(0xFEFE, 16); // hex value, 16 bits, no repeat
-  delay(400);
+  delay(50);
+  //irsend.sendNEC(0xFEFE, 16); // hex value, 16 bits, no repeat
+ // delay(400);
 
 }

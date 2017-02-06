@@ -3,7 +3,7 @@
 
 #include <Wire.h>
 #include <IRremote.h>
-int RECV_PIN = 11;
+int RECV_PIN = 7;
 IRsend irsend;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
@@ -123,8 +123,9 @@ void loop() {
         if (results.decode_type == JVC) {
          // Serial.println("received NEC code    ");
           int channel = results.value;
-        //  Serial.println(channel);
+          //Serial.println(channel);
           if (channel >= 0 && channel <= 100) {
+            //Serial.println("valid");
             noSignalCount = 0; //reset counter for 'mix back'
             ////addition
 //            time_from_last_change = millis() - last_change;
@@ -237,8 +238,8 @@ void loop() {
       if (time_from_last_step >= step_dureation) {
         //yes
         last_step = millis();
-        volume_channel_1 += step_direction * 5;
-        volume_channel_2 -= step_direction * 5;
+        volume_channel_1 += step_direction *7;
+        volume_channel_2 -= step_direction *7;
 
          //to fix/prevent any over-range bugs:
         volume_channel_1 = min(max(volume_channel_1,0),255);
@@ -263,6 +264,6 @@ void loop() {
       }
       break;
   }
-  delay(120); //TAL HACK: TEST DELAY EFFECT ON DECISION MAKING INSIDE STATE MACHINE
+  //delay(120); //TAL HACK: TEST DELAY EFFECT ON DECISION MAKING INSIDE STATE MACHINE
 }
 

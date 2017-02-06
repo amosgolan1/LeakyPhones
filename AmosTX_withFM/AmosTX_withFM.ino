@@ -15,7 +15,7 @@ IRsend irsend;
 #include <Adafruit_Si4713.h>
 
 #define RESETPIN 12
-#define CHANNEL 292//107FM 
+#define CHANNEL 50//107FM 
 
 
 Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
