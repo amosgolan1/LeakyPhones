@@ -36,16 +36,31 @@ int freq = 10300;
 const int RECEIVING = 0;
 const int MIX = 1;
 
+//addition
+int noSignalCount = 0;
+#define HOW_MANY_SIGNALS_TO_MISS_BEFORE_MIXING_BACK_TO_SELF 20
+//end addition
 
+//mcp42010 variables
+#include "AH_MCP41xxx.h"
+//#define DATAOUT  11   //uno MOSI , IC SI
+//#define SPICLOCK 13   //uno SCK  , IC SCK
+#define CS   10   //chipselect pin
+#define SHDN 9   //shutdown pin
+#define RS   8   //reset pin
 
+#define POTIOMETER_0 0
+#define POTIOMETER_1 1
 
+AH_MCP41xxx mcp42010;
 
 void setup()
 {
   Serial.begin(9600);
   irrecv.enableIRIn(); // Start the receiver
   Serial.println("receiver on");
-
+  mcp42010.init_MCP42xxx (CS, SHDN, RS);  //initialisation
+  delay(100);
 }
 
 
@@ -102,15 +117,15 @@ void loop() {
 
       // received valid ir?
       //yes
-      Serial.println("receiving");
+      //Serial.println("receiving");
       if (irrecv.decode(&results) == true) {
-        Serial.println("waiting for signal");
+       // Serial.println("waiting for signal");
         if (results.decode_type == JVC) {
-          Serial.println("received NEC code    ");
+         // Serial.println("received NEC code    ");
           int channel = results.value;
-          Serial.println(channel);
+        //  Serial.println(channel);
           if (channel >= 0 && channel <= 100) {
-
+            noSignalCount = 0; //reset counter for 'mix back'
             ////addition
 //            time_from_last_change = millis() - last_change;
 //            if (time_from_last_change >= 30) {
@@ -118,10 +133,10 @@ void loop() {
               ///end addition
               
               current_frequancy = channelToFreq(channel);
-              Serial.print("frequancy:");
-              Serial.println(current_frequancy);
-              Serial.print("previous frequancy:");
-              Serial.println(previous_frequancy);
+             // Serial.print("frequancy:");
+            //  Serial.println(current_frequancy);
+              //Serial.print("previous frequancy:");
+             // Serial.println(previous_frequancy);
               //is current =previous?
               //yes
               if (current_frequancy == previous_frequancy) {
@@ -129,20 +144,20 @@ void loop() {
                 //am I at the maximum of channel 2
                 //yes
                 if (volume_channel_2 == 255) {
-                  Serial.println("ive reached the end of channel 2");
+                //  Serial.println("ive reached the end of channel 2");
                   state = RECEIVING;
                 }
                 //no
                 else {
                   //previous_frequancy = current_frequancy;
-                  Serial.println("stil didn't reach 255 in channel 2");
+               //   Serial.println("stil didn't reach 255 in channel 2");
                   step_direction = -1;
                   state = MIX;
                 }
               }
               //no, current!=previous
               else {
-                Serial.println("previous is -1, current is somthing new");
+             //   Serial.println("previous is -1, current is somthing new");
                 previous_frequancy = current_frequancy;
                 step_direction = -1;
                 state = MIX;
@@ -164,17 +179,17 @@ void loop() {
 
 
           
-          Serial.println("didn't receive anything, current frequancy=-1");
+          //Serial.println("didn't receive anything, current frequancy=-1");
           current_frequancy = -1;
           //is current =previous?
           //yes
           if (current_frequancy == previous_frequancy) {
-            Serial.println("previous frequancy= -1");
+            //Serial.println("previous frequancy= -1");
             previous_frequancy = current_frequancy;
             //am I at the maximum of channel 1?
             //yes
             if (volume_channel_1 == 255) {
-            Serial.println("reached 255 in channel 1");
+           // Serial.println("reached 255 in channel 1");
               state = RECEIVING;
               //break;
 
@@ -182,7 +197,7 @@ void loop() {
             //no
             else {
               step_direction = 1;
-              Serial.println("stil didn't reach 255 in channel 1");
+              //Serial.println("stil didn't reach 255 in channel 1");
               state = MIX;
 //              Serial.println("Not recievd, still mixing");
               //break;
@@ -190,18 +205,24 @@ void loop() {
           }
           //no
           else {
-          Serial.println("previous frequancy!=-1");
+          //Serial.println("previous frequancy!=-1");
             step_direction = 1;
-            previous_frequancy = current_frequancy;
-            state = MIX;
+            if (noSignalCount > HOW_MANY_SIGNALS_TO_MISS_BEFORE_MIXING_BACK_TO_SELF) {    
+              previous_frequancy = current_frequancy; 
+              state = MIX;         
+            }
+            else {
+              noSignalCount++;
+            }
+
 
             //break;
 
           }
-          Serial.println("last change was more then 100ms ago");
+         // Serial.println("last change was more then 100ms ago");
         }
       }
-      Serial.println("finished the receiveing loop");
+      //Serial.println("finished the receiveing loop");
       //irrecv.resume(); // Receive the next value
 
       break;
@@ -209,7 +230,7 @@ void loop() {
 
 
     case MIX:
-      Serial.println("mixing");
+      //Serial.println("mixing");
       //record the current time
       long time_from_last_step = millis() - last_step;
       //is it time to do another mixing step?
@@ -219,12 +240,20 @@ void loop() {
         volume_channel_1 += step_direction * 5;
         volume_channel_2 -= step_direction * 5;
 
+         //to fix/prevent any over-range bugs:
+        volume_channel_1 = min(max(volume_channel_1,0),255);
+        volume_channel_2 = min(max(volume_channel_2,0),255);
+        
+        mcp42010.setValue(volume_channel_1, POTIOMETER_0);
+        mcp42010.setValue(volume_channel_2, POTIOMETER_1);
+//Serial.print(" 200 "); 
         Serial.print("channel_1_volume is: ");
         Serial.println(volume_channel_1);
         Serial.print("channel_2_volume is: ");
         Serial.println(volume_channel_2);
         //Serial.println(previous_frequancy);
         //Serial.println(current_frequancy);
+        //Serial.print(" 0 "); 
         last_change = millis();
         state = RECEIVING;
       }
@@ -234,5 +263,6 @@ void loop() {
       }
       break;
   }
+  delay(120); //TAL HACK: TEST DELAY EFFECT ON DECISION MAKING INSIDE STATE MACHINE
 }
 
