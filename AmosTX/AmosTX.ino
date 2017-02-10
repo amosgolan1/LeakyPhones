@@ -14,15 +14,6 @@ IRsend irsend;
 #include <Adafruit_Si4713.h>
 
 #define RESETPIN 12
-
-#define FMSTATION 10230      // 10230 == 102.30 MHz
-
-Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
-#include <Wire.h>
-#include <Adafruit_Si4713.h>
-
-#define RESETPIN 12
-
 #define FMSTATION 9800     // 9800=98.00Hz
 
 Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
@@ -31,6 +22,13 @@ Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
 void setup()
 {
   Serial.begin(9600);
+  
+  if (! radio.begin()) {  // begin with address 0x63 (CS high default)
+    Serial.println("Couldn't find radio?");
+    while (1);}
+    radio.setTXpower(115);
+    radio.tuneFM(FMSTATION); // 98.00 mhz
+    Serial.println("tuned to FM STATION");
 }
 
 
@@ -39,6 +37,7 @@ void setup()
  */
 int16_t channelToFreq(int16_t channel) {
   return 8790 + 20*(channel-200);
+  
 }
 
 /** 
@@ -71,6 +70,7 @@ void loop() {
 
   //irsend.sendNEC(50 + (50<<8), 16); // hex value, 16 bits, no repeat
   irsend.sendNEC(50, 16); 
+  //Serial.println(
   //irsend.sendNEC(0x32,16);
   //Serial.println(0x32,DEC);
   //Serial.println("sent");

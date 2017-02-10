@@ -238,8 +238,8 @@ void loop() {
       if (time_from_last_step >= step_dureation) {
         //yes
         last_step = millis();
-        volume_channel_1 += step_direction *7;
-        volume_channel_2 -= step_direction *7;
+        volume_channel_1 += step_direction *10;
+        volume_channel_2 -= step_direction *10;
 
          //to fix/prevent any over-range bugs:
         volume_channel_1 = min(max(volume_channel_1,0),255);
@@ -248,10 +248,12 @@ void loop() {
         mcp42010.setValue(volume_channel_1, POTIOMETER_0);
         mcp42010.setValue(volume_channel_2, POTIOMETER_1);
 //Serial.print(" 200 "); 
-        Serial.print("channel_1_volume is: ");
-        Serial.println(volume_channel_1);
-        Serial.print("channel_2_volume is: ");
-        Serial.println(volume_channel_2);
+        Serial.print("[CH1,CH2 volume]: [ ");
+        Serial.print(volume_channel_1);
+        Serial.print(" , ");
+        Serial.print(volume_channel_2);
+        Serial.println(" ]");
+        delay(1);
         //Serial.println(previous_frequancy);
         //Serial.println(current_frequancy);
         //Serial.print(" 0 "); 
