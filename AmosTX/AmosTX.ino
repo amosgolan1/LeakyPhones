@@ -14,7 +14,7 @@ IRsend irsend;
 #include <Adafruit_Si4713.h>
 
 #define RESETPIN 12
-#define FMSTATION 9800     // 9800=98.00Hz
+#define FMSTATION 9740     // 9800=98.00Hz
 
 Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
 
@@ -22,7 +22,6 @@ Adafruit_Si4713 radio = Adafruit_Si4713(RESETPIN);
 void setup()
 {
   Serial.begin(9600);
-  
   if (! radio.begin()) {  // begin with address 0x63 (CS high default)
     Serial.println("Couldn't find radio?");
     while (1);}
@@ -35,53 +34,32 @@ void setup()
 /** 
  *  convert FCC Channel number [200..300] into 'tens of khz' number as used in the SI4713 FM Library * 
  */
-int16_t channelToFreq(int16_t channel) {
-  return 8790 + 20*(channel-200);
-  
+int freqToChannel(int freq) {
+  return (freq - 8800) / 20;
 }
 
 /** 
  *  convert ferquency in 'tens of khz' number as used in the SI4713 FM Library into FCC Channel number [200..300] 
  */
-int16_t freqToChannel(int16_t freq) {
-  return 200 + (freq-8790) / 20;
+int channelToFreq(int channel) {
+  return 8800 + channel * 20;
 }
 
-/** 
- *  gets a number of a channel from 200..300 and converts it to a 16-bit AMOS-Code.
- */
-int16_t channelToAMOS(int16_t channel) {
-  int16_t base = (channel-200);
-  int16_t result = base + (base << 8);  
-  return result;
-}
 
 /** 
  *  gets a number of a channel from 200..300 and transmits its AMOS-Code over IR
  */
-void sendChannel(int16_t channel) {
-  irsend.sendNEC(channelToAMOS(channel), 16); 
+void sendChannel(int freq) {
+  //do i need 8 bit or 32 bit here? is the numbr the length of the NEC code (always 32) or the lenght of the massage?
+  irsend.sendNEC(freqToChannel(freq), 16);
 }
 
-void loop() {
-//  irsend.sendPanasonic(PanasonicAddress,PanasonicPower); // This should turn your TV on and off
-  
-//  irsend.sendJVC(JVCPower, 16,0); // hex value, 16 bits, no repeat
+void loop() { 
+    sendChannel(FMSTATION);
+    //Serial.println(FMSTATION);
+    delay(42);
 
-  //irsend.sendNEC(50 + (50<<8), 16); // hex value, 16 bits, no repeat
-  irsend.sendNEC(50, 16); 
-  //Serial.println(
-  //irsend.sendNEC(0x32,16);
-  //Serial.println(0x32,DEC);
-  //Serial.println("sent");
-  //sendChannel(225);
-  //Serial.println("sent");
-//  delayMicroseconds(50); // see http://www.sbprojects.com/knowledge/ir/jvc.php for information
-//  irsend.sendJVC(JVCPower, 16,1); // hex value, 16 bits, repeat
-//  delayMicroseconds(50);
-
-  delay(50);
-  //irsend.sendNEC(0xFEFE, 16); // hex value, 16 bits, no repeat
- // delay(400);
 
 }
+
+

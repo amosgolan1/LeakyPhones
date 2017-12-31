@@ -1,9 +1,13 @@
-//IR LED must be connected to Arduino PWM pin 3.
 // IR receiver connected to pin 7
 
 #include <Wire.h>
 #include <IRremote.h>
 #include <Si4703_Breakout.h>
+#define FMSTATION 10700//change this according to my own TRANSMITION frquancy
+
+#include <Adafruit_Si4713.h>
+#define RESETPIN 12
+Adafruit_Si4713 radioTransmitter = Adafruit_Si4713(RESETPIN);
 
 //Si4703 radio receiver variables
 int resetPin = 2;
@@ -12,6 +16,11 @@ int SCLK = A5;
 #define RECV_PIN 7
 
 Si4703_Breakout radio(resetPin, SDIO, SCLK);
+
+//analog potentiometers used to tune timeing parameters
+int potPin0=0;
+int potPin1=1;
+int potPin2=2;
 
 
 IRsend irsend;
@@ -72,14 +81,20 @@ void setup()
   irrecv.enableIRIn(); // Start the receiver
   Serial.println("receiver on");
 
-  mcp42010.init_MCP42xxx (CS, SHDN, RS);  //mcp42010 initialisation
+   mcp42010.init_MCP42xxx (CS, SHDN, RS);  //mcp42010 initialisation
   Serial.println("mixer on");
 
   radio.powerOn();//si4703 radio receiver setup
   radio.setVolume(0);// set volume to mute. volume can be 0-15
   Serial.println("radio receiver on");
 
-  delay(100);
+//  if (! radioTransmitter.begin()) {  // begin with address 0x63 (CS high default)
+//    Serial.println("Couldn't find radio?");
+//    while (1);}
+//    radioTransmitter.setTXpower(115);
+//    radioTransmitter.tuneFM(FMSTATION); // 98.00 mhz
+//    Serial.println("tuned to FM STATION");
+//  delay(100);
 }
 
 
@@ -164,6 +179,7 @@ int IRTarget = -1;
 int TargetFrequancy = -1;
 long lastValidIRTime = 0;
 
+//commentead out to test potentiometer values//
 #define IR_EXPIRATION_MS 300
 
 long startMixTime;
@@ -171,16 +187,13 @@ int startMixValue;
 double mixRateMsPerStep;
 
 void loop() {
+
   //take care of IR
   int currentMix = getMix();
   int channelReceived = IR_Received();
   long currentTime = millis();
 
-  //  Serial.print(channelReceived);
-  //  Serial.print("\t");
-  //  Serial.println(currentMix);
-
-  if (-1 != channelReceived) {
+  if (-1 != channelReceived &&  freqToChannel(FMSTATION)!= channelReceived ) {
     if (channelReceived == IRTarget || SELF == currentMix) {
       IRTarget = channelReceived;
       TargetFrequancy = (channelToFreq(IRTarget)) / 10; //convert channel to frequancy and devide by 10 to match the si4703's range
@@ -197,7 +210,7 @@ void loop() {
     mixTarget = SELF;
     startMixTime = currentTime;
     startMixValue = currentMix;
-    mixRateMsPerStep = 5.0;
+    mixRateMsPerStep = 10.0;
   }
 
   if ((currentTime - lastValidIRTime) <= IR_EXPIRATION_MS && mixTarget != OTHER) {
@@ -219,6 +232,5 @@ void loop() {
 
     setMix(mixNewValue);
   }
-
 }
 
