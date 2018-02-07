@@ -1,2 +1,2 @@
-# leakyEarphones
+# LeakyPhones 
 by Amos Golan
