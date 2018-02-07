@@ -1,5 +1,2 @@
-<<<<<<< HEAD
-=======
-# LeakyPhones 
->>>>>>> origin/master
+# leakyHeadphones
 by Amos Golan
