@@ -22,7 +22,7 @@
 byte resistance = 0;
 int testIN1 = A0;
 int testIN2 = A1;
-const int VOL_LOOKOUT[] =  {255,254,250,243,235,
+const int VOL_LOOKUP[] =  {255,254,250,243,235,
                             224,211,196,180,163,146,128,109,
                             92,75,59,44,31,20,12,5,1,0, 300};
                             
@@ -31,7 +31,7 @@ const int SIN_LOOKUP[] = {0,13,25,37,50,62,74,86,
                              180,189,197,205,212,219,225,230,
                              236,240,244,247,250,252,254,255};
                             
-const int LOG_LOOKOUT[] =  {250,249,248,247,246,245,244,243,
+const int LOG_LOOKUP[] =  {250,249,248,247,246,245,244,243,
                             239,233,230,227,223,215,210,198,
                             191,184,175,165,154,142,128,112,
                              95,75,53,28,0,300};
@@ -68,11 +68,11 @@ mcp42010_1.shutdown(1);
 mcp42010_2.shutdown(1);
 //Serial.println("swipe sin");
 for (int i=0; i<23; i++){
-mcp42010_1.setValue(VOL_LOOKOUT[i], POTIOMETER_1);       
-mcp42010_1.setValue(VOL_LOOKOUT[i], POTIOMETER_2); 
-mcp42010_2.setValue(VOL_LOOKOUT[23-i], POTIOMETER_1);       
-mcp42010_2.setValue(VOL_LOOKOUT[23-i], POTIOMETER_2); 
-Serial.println(VOL_LOOKOUT[i]);
+mcp42010_1.setValue(VOL_LOOKUP[i], POTIOMETER_1);       
+mcp42010_1.setValue(VOL_LOOKUP[i], POTIOMETER_2); 
+mcp42010_2.setValue(VOL_LOOKUP[23-i], POTIOMETER_1);       
+mcp42010_2.setValue(VOL_LOOKUP[23-i], POTIOMETER_2); 
+Serial.println(VOL_LOOKUP[i]);
 delay(200);
   }
 digitalWrite(SHDN_1,0);
@@ -100,11 +100,11 @@ mcp42010_1.shutdown(1);
 mcp42010_2.shutdown(1);
 Serial.println("swipe log");
 for (int i=0; i<29; i++){
-mcp42010_1.setValue(LOG_LOOKOUT[i], POTIOMETER_1);       
-mcp42010_1.setValue(LOG_LOOKOUT[i], POTIOMETER_2);
-mcp42010_2.setValue(LOG_LOOKOUT[29-i], POTIOMETER_1);       
-mcp42010_2.setValue(LOG_LOOKOUT[29-i], POTIOMETER_2);  
-Serial.println(LOG_LOOKOUT[i]);
+mcp42010_1.setValue(LOG_LOOKUP[i], POTIOMETER_1);       
+mcp42010_1.setValue(LOG_LOOKUP[i], POTIOMETER_2);
+mcp42010_2.setValue(LOG_LOOKUP[29-i], POTIOMETER_1);       
+mcp42010_2.setValue(LOG_LOOKUP[29-i], POTIOMETER_2);  
+Serial.println(LOG_LOOKUP[i]);
 delay(200);
   }
 digitalWrite(SHDN_1,0);

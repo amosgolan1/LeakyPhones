@@ -9,13 +9,13 @@ int resetPin = 2;
 int SDIO = A4;
 int SCLK = A5;
 
-#define DEFAULT_STATION 9290
-#define DEFAULT_CHANNEL freqToChannel(DEFAULT_STATION)
+#define DEFAULT_STATION 9290   //define the defult station
+#define DEFAULT_CHANNEL freqToChannel(DEFAULT_STATION) //define the default channel based on station  
 
-#define TIME_PER_IR_SEND 108
-#define MILLIS_BEFORE_RETURN_TO_DEFUALT 3*TIME_PER_IR_SEND
+#define TIME_PER_IR_SEND 108 //duration of....
+#define MILLIS_BEFORE_RETURN_TO_DEFUALT 3*TIME_PER_IR_SEND //....
 
-Si4703_Breakout radio(resetPin, SDIO, SCLK);
+Si4703_Breakout radio(resetPin, SDIO, SCLK);//initiate fm radio receiver object
 int radioChannel;
 int radioVolume;
 
@@ -48,7 +48,7 @@ int RECV_PIN = 11;
 
 #define AMOS_INVALID 0
 
-IRrecv irrecv(RECV_PIN);
+IRrecv irrecv(RECV_PIN); //create the IR receiver object
 
 decode_results results;
 
@@ -67,8 +67,8 @@ void setup()
   volChange_StartVol = 0;
   volChange_EndVol = 7;
 
-  radio.powerOn();
-  setVolumeIfNeeded(7);
+  radio.powerOn();// Start FM radio receiver
+  setVolumeIfNeeded(7);//set the volume of the radio receiver to default 7
 }
 
 
@@ -157,7 +157,7 @@ int16_t freqToChannel(int16_t freq) {
  */
 int16_t amosToChannel(int16_t amos) {
   if (isValidAmos(amos)) {
-    int16_t amosBase = amos & 0x00FF;
+    int16_t amosBase = amos & 0x00FF; //bitwise add the 2 byte "amos" code with 0000 0000 1111 1111, then turns the binary number to a decimal number
     int16_t result = amosBase + 200;
     return result;
   }
@@ -171,15 +171,15 @@ int16_t amosToChannel(int16_t amos) {
  * return true iff the code is a valid AMOS-Code...
  */
 bool isValidAmos(int16_t amos) {
-  return (((0xFF00 & amos) >> 8) == (0x00FF & amos)) 
-          && ((0x00FF & amos) < 101);
+  return (((0xFF00 & amos) >> 8) == (0x00FF & amos)) //amos code is a 16 bit sequance that repeats the same 8 bit code twice, therefor it should be identical if you shif 8 bits to the right
+          && ((0x00FF & amos) < 101);//the 8 bit portion of the amos code should be <101 since there are only 100 chanels 
 }
 
 /**
  * schedule immediate tune of SI4703 to given FCC channel, iff not already at that channel;
  */
 void tuneIfNeeded(int16_t channel) {
-  int16_t newRadioChannel = adafruitToSparkfun(channelToFreq(channel));
+  int16_t newRadioChannel = adafruitToSparkfun(channelToFreq(channel));//new radio channel in adafruit readable format (4 digit frequancey)
   if (radioChannel != newRadioChannel) {
     rcChange_DestChannel = newRadioChannel;
     rcChange_Time = millis(); //now
@@ -210,9 +210,12 @@ void setVolumeIfNeeded(int vol) {
   }
 }
 
+/**
+ * sets the volume value based on time. 
+ */
 void setVolumeByTime() {
   long currentTime = millis();
-  if (currentTime < volChange_StartTime) {
+  if (currentTime < volChange_StartTime) { //first, we check if we look for long enough to start changing volume
     return; //nothing to do yet;
   }
 
