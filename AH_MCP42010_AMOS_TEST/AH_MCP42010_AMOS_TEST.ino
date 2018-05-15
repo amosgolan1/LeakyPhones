@@ -4,7 +4,7 @@
 *                                                      **
 **  http://www.arduino-projekte.de                     **
 ********************************************************/
-
+///This is the TEST version that works////
 #include "AH_MCP41xxx.h"
 //#include <SPI.h>
 
@@ -46,7 +46,6 @@ void setup()
  Serial.println("Setup ready");
  mcp42010_1.init_MCP42xxx (CS_1, SHDN_1, RS);  //initialisation
  mcp42010_2.init_MCP42xxx (CS_2, SHDN_2, RS);  //initialisation
-
 }
 
 void loop()
@@ -75,8 +74,11 @@ mcp42010_2.setValue(VOL_LOOKUP[23-i], POTIOMETER_2);
 Serial.println(VOL_LOOKUP[i]);
 delay(200);
   }
-digitalWrite(SHDN_1,0);
-digitalWrite(SHDN_2,1);
+mcp42010_1.shutdown(0);
+mcp42010_2.shutdown(1);
+
+//digitalWrite(SHDN_1,0);
+//digitalWrite(SHDN_2,1);
 
 }
 else if (Num==600){
@@ -92,7 +94,7 @@ Serial.println(i);
 delay(200);
   } 
 digitalWrite(SHDN_1,0);
-digitalWrite(SHDN_2,1);  
+//digitalWrite(SHDN_2,1);  
 }
 
 else if (Num==500){
@@ -107,8 +109,9 @@ mcp42010_2.setValue(LOG_LOOKUP[29-i], POTIOMETER_2);
 Serial.println(LOG_LOOKUP[i]);
 delay(200);
   }
-digitalWrite(SHDN_1,0);
-digitalWrite(SHDN_2, 1); 
+mcp42010_1.shutdown(0);
+//digitalWrite(SHDN_1,0);
+//digitalWrite(SHDN_2, 1); 
   
 }
 
@@ -125,12 +128,16 @@ mcp42010_1.shutdown(0);
 mcp42010_2.shutdown(1);
 mcp42010_2.setValue(255, POTIOMETER_1);       
 mcp42010_2.setValue(255, POTIOMETER_2);  
+mcp42010_1.setValue(0, POTIOMETER_1);       
+mcp42010_1.setValue(0, POTIOMETER_2);
   }
   else if(Num==255){
 mcp42010_1.shutdown(1);
 mcp42010_2.shutdown(0);
 mcp42010_1.setValue(255, POTIOMETER_1);       
 mcp42010_1.setValue(255, POTIOMETER_2);  
+mcp42010_2.setValue(0, POTIOMETER_1);       
+mcp42010_2.setValue(0, POTIOMETER_2); 
   }     
 
 else{

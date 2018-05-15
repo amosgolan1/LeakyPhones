@@ -60,7 +60,7 @@
 #include <Adafruit_Si4713.h>//trasmitter
 
 //Si4713 (blue) transmitter setup. clock=A5, Data=A4 reset=12
-#define MYFMSTATION 10700//change this according to this user's  TRANSMITION frquancy
+#define MYFMSTATION 10300//change this according to this user's  TRANSMITION frquancy
 #define DELAY_TIME 100//added delay time for IR transmitter. should be longer then 68 ms for NEC protocol
 #define RESETPIN 12//reset pin for the radio transmitter
 Adafruit_Si4713 radioTransmitter = Adafruit_Si4713(RESETPIN);
@@ -69,13 +69,13 @@ Adafruit_Si4713 radioTransmitter = Adafruit_Si4713(RESETPIN);
 unsigned long previousMillis = 0;
 
 //Si4703 (red) radio  receiver
-int resetPin = 2;
+int resetPin = 7;
 int SDIO = A4;
 int SCLK = A5;
 Si4703_Breakout radio(resetPin, SDIO, SCLK);
 
 //IR receiver
-#define RECV_PIN 7
+#define RECV_PIN 2
 IRrecv myReceiver(RECV_PIN);
 IRdecode myDecoder;   //create decoder in the future i can use:"IRdecodeNEC My_Decoder; and this will save space on on arduino when decoding
 
@@ -208,7 +208,7 @@ int32_t channelToFreq(int channel) {
     gets a frequancy number of a channel from 0..100 and transmits it over IR using NEC protocol (32 bits, 8 adress, 8 inverse of adress, 8 data, 8 inverse of data)
 */
 void sendChannel(int freq) {
-  mySender.send(NEC, freqToChannel(freq)); ///this is the problem. can't gt this to send code and refreash the receiver
+  mySender.send(NEC, freqToChannel(freq),0); ///this is the problem. can't gt this to send code and refreash the receiver
   myReceiver.enableIRIn();
 }
 
@@ -216,18 +216,21 @@ int IR_Received() {
   int result = -1;
   if (myReceiver.getResults()) {
     myDecoder.decode();
+    //Serial.print("received somthing");
     if (myDecoder.protocolNum == NEC) {
+          //Serial.print("received NEC");
+
       int channel = myDecoder.value;
       if (channel >= 0 && channel <= 100) {
         result = channel; //otherwise -1 will be returned (see bottom)
-        Serial.println(result, DEC);
+        //Serial.println(result, DEC);
       }
     }
   }
   myReceiver.enableIRIn();
-  Serial.println("IR received results:");
-  Serial.println(result);
-  Serial.println("----");
+  //Serial.println("IR received results:");
+  //Serial.println(result);
+  //Serial.println("----");
   return result;
 }
 
@@ -239,14 +242,14 @@ int IRTarget = -1;
 int TargetFrequancy = -1;
 long lastValidIRTime = 0;
 
-#define IR_EXPIRATION_MS 500//was 300 was 500
+#define IR_EXPIRATION_MS 3000//was 300 was 500
 
 long startMixTime = 0; //added =0
 int startMixIndex = -1;//added =-1
 double mixRateMsPerStep;
 
 void loop() {
-
+  //Serial.print("loopping");
   //record time for LED transmitter
   unsigned long currentMillis = millis();
   //check if time has passed to send again
@@ -254,15 +257,17 @@ void loop() {
     //Serial.println("send");
     previousMillis = currentMillis;
     sendChannel(MYFMSTATION);
-    delay(75);//was 100. couldn't get below 75-dosn't get all the way to index 29
+    delay(150);//was 75. couldn't get below 75-dosn't get all the way to index 29. works better with longer delay (strange..)
    myReceiver.enableIRIn();
   }
-  //myReceiver.enableIRIn();
+  myReceiver.enableIRIn();
   //take care of IR receiver
   int currentMixIndex = getMix();// returns an index
   Serial.print("currentmindex:");
   Serial.println(currentMixIndex);
   int channelReceived = IR_Received();
+  long Now=millis();
+  Serial.print(Now);
   Serial.print("channel received:");
   Serial.println(channelReceived);
   Serial.print("mixTarget:");
@@ -272,14 +277,14 @@ void loop() {
 
   if (-1 != channelReceived &&  freqToChannel(MYFMSTATION) != channelReceived ) {//if i got something and that thing is different fron my own
     if (channelReceived == IRTarget || SELF == currentMixIndex) {  //was SELF==currentMixIndex ...if the receiverd channel is alreday my target o I'm at the target
-      IRTarget = channelReceived;
-      Serial.println("IRTarget:");
-      Serial.println(IRTarget);
+      IRTarget = channelReceived;//this is where the problem is: IrTarget is 29. channel received is 100...
+      //Serial.println("IRTarget:");
+      //Serial.println(IRTarget);
 
       TargetFrequancy = (channelToFreq(IRTarget)) / 10; //convert channel to frequancy and devide by 10 to match the si4703's range
       //Serial.println(TargetFrequancy);
       if (SELF == currentMixIndex) {
-        Serial.println("SELF == currentMixIndex");
+        //Serial.println("SELF == currentMixIndex");
         radio.setChannel(TargetFrequancy);//set channel to target frequancy
         radio.setVolume(7);//set radio volume range is 0-15
       }
@@ -301,7 +306,7 @@ void loop() {
     startMixTime = currentTime;//record time
 
     startMixIndex = currentMixIndex;
-    mixRateMsPerStep = 75.0; //was
+    mixRateMsPerStep = 75.0; //was 100
   }
 
   if (currentMixIndex != mixTarget) {
@@ -309,10 +314,10 @@ void loop() {
     int mixNewRawIndex = startMixIndex + mixDirection * ((currentTime - startMixTime) / mixRateMsPerStep);//is the problem here?
     int mixNewIndex = max(SELF, min(OTHER, mixNewRawIndex)); //value between 0 and sizeof(lookuptable)-1
 
-    Serial.print(mixDirection);
-    Serial.print("\t");
-    Serial.print(mixNewRawIndex);
-    Serial.print("\t");
+    //Serial.print(mixDirection);
+    //Serial.print("\t");
+    //Serial.print(mixNewRawIndex);
+    //Serial.print("\t");
     Serial.println(mixNewIndex);
 
     setMix(mixNewIndex);
