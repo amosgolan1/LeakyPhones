@@ -1,4 +1,7 @@
 /*
+  TODO:add switchs
+  test real hedst
+  test mixing with self made PCB
    DO NOT FORGET TO CONNECT FM RECEIVER TO 3.3V AND NOT TO 5V
 
   Pin connection:
@@ -208,7 +211,7 @@ int32_t channelToFreq(int channel) {
     gets a frequancy number of a channel from 0..100 and transmits it over IR using NEC protocol (32 bits, 8 adress, 8 inverse of adress, 8 data, 8 inverse of data)
 */
 void sendChannel(int freq) {
-  mySender.send(NEC, freqToChannel(freq),0); ///this is the problem. can't gt this to send code and refreash the receiver
+  mySender.send(NEC, freqToChannel(freq),32); ///this is the problem. can't gt this to send code and refreash the receiver
   myReceiver.enableIRIn();
 }
 
